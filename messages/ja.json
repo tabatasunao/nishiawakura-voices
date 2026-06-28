@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "propose": "質問を提案する",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "admin": "管理"
+  },
+  "home": {
+    "title": "西粟倉村 選挙公開質問状",
+    "subtitle": "村の未来を決める10の問いに投票してください。上位10問が候補者への公開質問状になります。",
+    "tabs": {
+      "active": "投票中の質問",
+      "proposed": "提案された質問"
+    },
+    "voteCount": "{count}票",
+    "residentCount": "うち村民{count}人",
+    "commentCount": "{count}件のコメント",
+    "topBadge": "TOP10",
+    "selectedBadge": "選定済"
+  },
+  "question": {
+    "vote": "投票する",
+    "unvote": "投票を取り消す",
+    "alreadyVoted": "投票済み",
+    "loginToVote": "投票するにはログインが必要です",
+    "comments": "コメント",
+    "addComment": "コメントを追加",
+    "commentPlaceholder": "この質問についてご意見をどうぞ…",
+    "submitComment": "投稿する",
+    "residentLabel": "村民",
+    "backToList": "一覧に戻る"
+  },
+  "propose": {
+    "title": "新しい質問を提案する",
+    "titleLabel": "質問タイトル",
+    "titlePlaceholder": "短いタイトルを入力してください",
+    "bodyLabel": "質問の内容",
+    "bodyPlaceholder": "候補者に聞きたいことを具体的に書いてください…",
+    "categoryLabel": "カテゴリ",
+    "submit": "提案する",
+    "success": "質問が提案されました。ありがとうございます！",
+    "loginRequired": "提案するにはログインが必要です"
+  },
+  "categories": {
+    "財政": "財政",
+    "人口": "人口",
+    "産業": "産業",
+    "林業": "林業",
+    "農業": "農業",
+    "観光": "観光",
+    "教育": "教育",
+    "医療福祉": "医療福祉",
+    "インフラ": "インフラ",
+    "脱炭素": "脱炭素",
+    "その他": "その他"
+  },
+  "login": {
+    "title": "ログイン / 新規登録",
+    "phoneLabel": "携帯電話番号",
+    "phonePlaceholder": "090-1234-5678",
+    "sendOtp": "認証コードを送信",
+    "otpLabel": "認証コード（SMS）",
+    "otpPlaceholder": "6桁のコードを入力",
+    "verify": "確認する",
+    "otpSent": "SMSに認証コードを送信しました",
+    "back": "戻る"
+  },
+  "onboarding": {
+    "title": "はじめに教えてください",
+    "residentQuestion": "あなたは現在、西粟倉村にお住まいですか？",
+    "yes": "はい、村民です",
+    "no": "いいえ、村外です",
+    "nameLabel": "表示名（任意）",
+    "namePlaceholder": "ニックネームや名前",
+    "submit": "はじめる",
+    "subtitle": "投票やコメントに使う情報です。村民の方は「村民」バッジが付きます。"
+  },
+  "admin": {
+    "title": "管理画面",
+    "questions": "質問管理",
+    "selectTop10": "公開質問状に選定",
+    "deselectTop10": "選定を解除",
+    "archive": "非表示にする",
+    "exportTitle": "公開質問状をエクスポート",
+    "export": "マークダウンでエクスポート",
+    "voteCount": "票数",
+    "residentVotes": "村民票",
+    "status": "ステータス",
+    "category": "カテゴリ"
+  },
+  "errors": {
+    "generic": "エラーが発生しました。もう一度お試しください。",
+    "alreadyVoted": "この質問にはすでに投票済みです。",
+    "loginRequired": "この操作にはログインが必要です。",
+    "commentEmpty": "コメントを入力してください。"
+  }
+}

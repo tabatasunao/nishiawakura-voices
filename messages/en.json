@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "home": "Home",
+    "propose": "Propose a Question",
+    "login": "Login",
+    "logout": "Logout",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Nishiawakura Village Election Questions",
+    "subtitle": "Vote on the questions that matter most. The top 10 will become the official candidate inquiry letter.",
+    "tabs": {
+      "active": "Active Questions",
+      "proposed": "Proposed Questions"
+    },
+    "voteCount": "{count} votes",
+    "residentCount": "incl. {count} residents",
+    "commentCount": "{count} comments",
+    "topBadge": "TOP10",
+    "selectedBadge": "Selected"
+  },
+  "question": {
+    "vote": "Vote",
+    "unvote": "Remove Vote",
+    "alreadyVoted": "Voted",
+    "loginToVote": "Log in to vote",
+    "comments": "Comments",
+    "addComment": "Add a comment",
+    "commentPlaceholder": "Share your thoughts on this question…",
+    "submitComment": "Submit",
+    "residentLabel": "Resident",
+    "backToList": "Back to list"
+  },
+  "propose": {
+    "title": "Propose a New Question",
+    "titleLabel": "Question Title",
+    "titlePlaceholder": "Enter a short title",
+    "bodyLabel": "Question Body",
+    "bodyPlaceholder": "Write what you'd like to ask candidates, as specifically as possible…",
+    "categoryLabel": "Category",
+    "submit": "Submit Proposal",
+    "success": "Your question has been submitted. Thank you!",
+    "loginRequired": "You must be logged in to propose a question"
+  },
+  "categories": {
+    "財政": "Finance",
+    "人口": "Population",
+    "産業": "Industry",
+    "林業": "Forestry",
+    "農業": "Agriculture",
+    "観光": "Tourism",
+    "教育": "Education",
+    "医療福祉": "Healthcare & Welfare",
+    "インフラ": "Infrastructure",
+    "脱炭素": "Decarbonization",
+    "その他": "Other"
+  },
+  "login": {
+    "title": "Login / Sign Up",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "+81-90-1234-5678",
+    "sendOtp": "Send Verification Code",
+    "otpLabel": "Verification Code (SMS)",
+    "otpPlaceholder": "Enter 6-digit code",
+    "verify": "Verify",
+    "otpSent": "A verification code has been sent via SMS",
+    "back": "Back"
+  },
+  "onboarding": {
+    "title": "Tell us about yourself",
+    "residentQuestion": "Do you currently live in Nishiawakura village?",
+    "yes": "Yes, I'm a village resident",
+    "no": "No, I live outside the village",
+    "nameLabel": "Display Name (optional)",
+    "namePlaceholder": "Nickname or name",
+    "submit": "Get Started",
+    "subtitle": "This information will appear alongside your votes and comments. Residents will receive a 'Resident' badge."
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "questions": "Question Management",
+    "selectTop10": "Select for Inquiry Letter",
+    "deselectTop10": "Deselect",
+    "archive": "Archive",
+    "exportTitle": "Export Candidate Inquiry Letter",
+    "export": "Export as Markdown",
+    "voteCount": "Votes",
+    "residentVotes": "Resident Votes",
+    "status": "Status",
+    "category": "Category"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "alreadyVoted": "You have already voted on this question.",
+    "loginRequired": "You must be logged in to do this.",
+    "commentEmpty": "Please enter a comment."
+  }
+}
