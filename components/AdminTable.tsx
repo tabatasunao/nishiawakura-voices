@@ -10,17 +10,16 @@ import { updateQuestionStatus } from '@/app/actions'
 
 interface Props {
   questions: Question[]
-  adminToken: string
 }
 
-export default function AdminTable({ questions: initialQuestions, adminToken }: Props) {
+export default function AdminTable({ questions: initialQuestions }: Props) {
   const t = useTranslations('admin')
   const [questions, setQuestions] = useState(initialQuestions)
   const [isPending, startTransition] = useTransition()
 
   function handleStatus(id: string, status: Question['status']) {
     startTransition(async () => {
-      const result = await updateQuestionStatus(id, status, adminToken)
+      const result = await updateQuestionStatus(id, status)
       if (result.error) toast.error('エラーが発生しました')
       else setQuestions(qs => qs.map(q => q.id === id ? { ...q, status } : q))
     })

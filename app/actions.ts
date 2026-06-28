@@ -1,17 +1,19 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
-import { cookies } from 'next/headers'
+
+const VALID_CATEGORIES = ['財政','人口','産業','林業','農業','観光','教育','医療福祉','インフラ','脱炭素','その他']
 
 function isValidUUID(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
 }
 
-function isAdminAuthorized(): boolean {
-  // Check for admin token cookie set by middleware
-  return true // Middleware handles the guard; this is called only from admin page
+async function isAdmin(): Promise<boolean> {
+  const cookieStore = await cookies()
+  return cookieStore.get('nv_admin')?.value === process.env.ADMIN_TOKEN
 }
 
 export async function toggleVote(questionId: string, sessionId: string, isResident: boolean) {
@@ -27,7 +29,8 @@ export async function toggleVote(questionId: string, sessionId: string, isReside
     .single()
 
   if (existing) {
-    await db.from('votes').delete().eq('id', existing.id)
+    const { error } = await db.from('votes').delete().eq('id', existing.id)
+    if (error) return { error: error.message }
     revalidatePath('/', 'layout')
     return { voted: false }
   } else {
@@ -58,22 +61,24 @@ export async function addComment(questionId: string, sessionId: string, body: st
 
   if (error) return { error: error.message }
 
-  // Translate asynchronously — fills cache for EN viewers
   translateToEnglish(body.trim()).then(translated =>
     createAdminClient().from('comments').update({ body_en_cache: translated }).eq('id', comment.id)
   ).catch(() => {})
 
   revalidatePath('/', 'layout')
-  return { success: true }
+  return { success: true, comment }
 }
 
 export async function proposeQuestion(title: string, body: string, category: string, sessionId: string) {
   if (!isValidUUID(sessionId)) return { error: 'invalid' }
+  if (!title.trim() || title.length > 100) return { error: 'invalid' }
+  if (!body.trim() || body.length > 1000) return { error: 'invalid' }
+  if (!VALID_CATEGORIES.includes(category)) return { error: 'invalid' }
 
   const db = createAdminClient()
   const { data: question, error } = await db
     .from('questions')
-    .insert({ title, body, category, status: 'proposed', proposed_by_session: sessionId })
+    .insert({ title: title.trim(), body: body.trim(), category, status: 'proposed', proposed_by_session: sessionId })
     .select()
     .single()
 
@@ -87,8 +92,8 @@ export async function proposeQuestion(title: string, body: string, category: str
   return { success: true }
 }
 
-export async function updateQuestionStatus(questionId: string, status: 'active' | 'proposed' | 'archived' | 'selected', adminToken: string) {
-  if (adminToken !== process.env.ADMIN_TOKEN) return { error: 'unauthorized' }
+export async function updateQuestionStatus(questionId: string, status: 'active' | 'proposed' | 'archived' | 'selected') {
+  if (!await isAdmin()) return { error: 'unauthorized' }
 
   const db = createAdminClient()
   const { error } = await db.from('questions').update({ status }).eq('id', questionId)
@@ -97,14 +102,15 @@ export async function updateQuestionStatus(questionId: string, status: 'active' 
   return { success: true }
 }
 
-export async function deleteComment(commentId: string, sessionId: string, adminToken?: string) {
+export async function deleteComment(commentId: string, sessionId: string) {
   const db = createAdminClient()
 
-  // Admin can delete anything; session owner can delete their own
-  if (adminToken === process.env.ADMIN_TOKEN) {
-    await db.from('comments').delete().eq('id', commentId)
+  if (await isAdmin()) {
+    const { error } = await db.from('comments').delete().eq('id', commentId)
+    if (error) return { error: error.message }
   } else if (isValidUUID(sessionId)) {
-    await db.from('comments').delete().eq('id', commentId).eq('session_id', sessionId)
+    const { error } = await db.from('comments').delete().eq('id', commentId).eq('session_id', sessionId)
+    if (error) return { error: error.message }
   } else {
     return { error: 'unauthorized' }
   }

@@ -22,15 +22,17 @@ export default function VoteButton({ questionId, initialVoteCount, initialVoted 
   const [showModal, setShowModal] = useState(false)
 
   function doVote(session: Session) {
-    const newVoted = !voted
+    const prevVoted = voted
+    const prevCount = count
+    const newVoted = !prevVoted
     setVoted(newVoted)
     setCount(c => newVoted ? c + 1 : c - 1)
 
     startTransition(async () => {
       const result = await toggleVote(questionId, session.sessionId, session.isResident)
       if (result.error) {
-        setVoted(voted)
-        setCount(count)
+        setVoted(prevVoted)
+        setCount(prevCount)
         toast.error(t('errors.generic'))
       }
     })

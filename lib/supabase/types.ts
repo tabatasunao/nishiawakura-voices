@@ -42,6 +42,7 @@ export type Database = {
           vote_count?: number
           resident_vote_count?: number
         }
+        Relationships: []
       }
       votes: {
         Row: {
@@ -58,7 +59,8 @@ export type Database = {
           is_resident?: boolean
           created_at?: string
         }
-        Update: never
+        Update: Record<string, never>
+        Relationships: []
       }
       comments: {
         Row: {
@@ -84,8 +86,12 @@ export type Database = {
         Update: {
           body_en_cache?: string | null
         }
+        Relationships: []
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
   }
 }
 

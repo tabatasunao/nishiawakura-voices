@@ -7,7 +7,6 @@ import { ja } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import ResidentBadge from './ResidentBadge'
 import DeclarationModal from './DeclarationModal'
 import { addComment, deleteComment } from '@/app/actions'
@@ -17,10 +16,10 @@ import type { Comment } from '@/lib/supabase/types'
 interface Props {
   questionId: string
   initialComments: Comment[]
-  adminToken?: string
+  isAdmin?: boolean
 }
 
-export default function CommentSection({ questionId, initialComments, adminToken }: Props) {
+export default function CommentSection({ questionId, initialComments, isAdmin }: Props) {
   const t = useTranslations('question')
   const tErr = useTranslations('errors')
   const locale = useLocale()
@@ -31,15 +30,19 @@ export default function CommentSection({ questionId, initialComments, adminToken
   const [pendingSubmit, setPendingSubmit] = useState(false)
 
   const dateLocale = locale === 'ja' ? ja : undefined
+  const mySession = getSession()
 
   function doSubmit(session: Session) {
     if (!body.trim()) return
+    const optimisticBody = body
+    setBody('')
     startTransition(async () => {
-      const result = await addComment(questionId, session.sessionId, body, session.displayName, session.isResident)
+      const result = await addComment(questionId, session.sessionId, optimisticBody, session.displayName, session.isResident)
       if (result.error) {
         toast.error(tErr('generic'))
-      } else {
-        setBody('')
+        setBody(optimisticBody)
+      } else if (result.comment) {
+        setComments(c => [...c, result.comment!])
       }
     })
   }
@@ -66,7 +69,7 @@ export default function CommentSection({ questionId, initialComments, adminToken
 
   function handleDelete(commentId: string, sessionId: string) {
     startTransition(async () => {
-      const result = await deleteComment(commentId, sessionId, adminToken)
+      const result = await deleteComment(commentId, sessionId)
       if (result.error) toast.error(tErr('generic'))
       else setComments(c => c.filter(x => x.id !== commentId))
     })
@@ -94,7 +97,6 @@ export default function CommentSection({ questionId, initialComments, adminToken
         {comments.map(comment => {
           const text = locale === 'en' && comment.body_en_cache ? comment.body_en_cache : comment.body
           const name = comment.display_name ?? '匿名'
-          const mySession = getSession()
           const isOwn = mySession?.sessionId === comment.session_id
 
           return (
@@ -109,7 +111,7 @@ export default function CommentSection({ questionId, initialComments, adminToken
                   <span className="text-gray-400 text-xs">
                     {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: dateLocale })}
                   </span>
-                  {(isOwn || adminToken) && (
+                  {(isOwn || isAdmin) && (
                     <button
                       onClick={() => handleDelete(comment.id, comment.session_id)}
                       className="ml-auto text-gray-400 hover:text-red-500 text-xs"
@@ -118,9 +120,7 @@ export default function CommentSection({ questionId, initialComments, adminToken
                     </button>
                   )}
                 </div>
-                <p className="text-gray-700 leading-relaxed">
-                  {text ?? <Skeleton className="h-4 w-48" />}
-                </p>
+                <p className="text-gray-700 leading-relaxed">{text}</p>
               </div>
             </li>
           )

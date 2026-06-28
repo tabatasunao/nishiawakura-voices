@@ -2,8 +2,6 @@
   "nav": {
     "home": "Home",
     "propose": "Propose a Question",
-    "login": "Login",
-    "logout": "Logout",
     "admin": "Admin"
   },
   "home": {
@@ -20,12 +18,7 @@
     "selectedBadge": "Selected"
   },
   "question": {
-    "vote": "Vote",
-    "unvote": "Remove Vote",
-    "alreadyVoted": "Voted",
-    "loginToVote": "Log in to vote",
     "comments": "Comments",
-    "addComment": "Add a comment",
     "commentPlaceholder": "Share your thoughts on this question…",
     "submitComment": "Submit",
     "residentLabel": "Resident",
@@ -39,8 +32,7 @@
     "bodyPlaceholder": "Write what you'd like to ask candidates, as specifically as possible…",
     "categoryLabel": "Category",
     "submit": "Submit Proposal",
-    "success": "Your question has been submitted. Thank you!",
-    "loginRequired": "You must be logged in to propose a question"
+    "success": "Your question has been submitted. Thank you!"
   },
   "categories": {
     "財政": "Finance",
@@ -54,17 +46,6 @@
     "インフラ": "Infrastructure",
     "脱炭素": "Decarbonization",
     "その他": "Other"
-  },
-  "login": {
-    "title": "Login / Sign Up",
-    "phoneLabel": "Phone Number",
-    "phonePlaceholder": "+81-90-1234-5678",
-    "sendOtp": "Send Verification Code",
-    "otpLabel": "Verification Code (SMS)",
-    "otpPlaceholder": "Enter 6-digit code",
-    "verify": "Verify",
-    "otpSent": "A verification code has been sent via SMS",
-    "back": "Back"
   },
   "onboarding": {
     "title": "Tell us about yourself",
@@ -91,8 +72,6 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
-    "alreadyVoted": "You have already voted on this question.",
-    "loginRequired": "You must be logged in to do this.",
     "commentEmpty": "Please enter a comment."
   }
 }

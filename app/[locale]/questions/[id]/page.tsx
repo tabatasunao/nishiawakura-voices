@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { useTranslations, useLocale } from 'next-intl'
-import { Badge } from '@/components/ui/badge'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/server'
-import { translateToEnglish } from '@/lib/translate'
 import { cookies } from 'next/headers'
+import { useTranslations, useLocale } from 'next-intl'
+import { Link } from '@/i18n/navigation'
+import { Badge } from '@/components/ui/badge'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { translateToEnglish } from '@/lib/translate'
 import VoteButton from '@/components/VoteButton'
 import CommentSection from '@/components/CommentSection'
 
@@ -18,30 +17,31 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const { data: question } = await supabase.from('questions').select('*').eq('id', id).single()
   if (!question) notFound()
 
-  // Auto-translate if on English and no cache yet
+  // Auto-translate on first EN visit and cache the result
   if (locale === 'en' && process.env.OPENAI_API_KEY) {
     const needsTitle = !question.title_en_cache
     const needsBody = !question.body_en_cache
     if (needsTitle || needsBody) {
-      const adminClient = createAdminClient()
-      const [titleEn, bodyEn] = await Promise.all([
-        needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
-        needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
-      ])
-      await adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
-      question.title_en_cache = titleEn
-      question.body_en_cache = bodyEn
+      try {
+        const adminClient = createAdminClient()
+        const [titleEn, bodyEn] = await Promise.all([
+          needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
+          needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
+        ])
+        await adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
+        question.title_en_cache = titleEn
+        question.body_en_cache = bodyEn
+      } catch {
+        // Falls back to Japanese on translation error
+      }
     }
   }
 
   const title = locale === 'en' && question.title_en_cache ? question.title_en_cache : question.title
   const body = locale === 'en' && question.body_en_cache ? question.body_en_cache : question.body
 
-  // Check if requester is admin (via cookie)
   const cookieStore = await cookies()
-  const adminCookie = cookieStore.get('nv_admin')?.value
-  const isAdmin = adminCookie === process.env.ADMIN_TOKEN
-  const adminToken = isAdmin ? process.env.ADMIN_TOKEN : undefined
+  const isAdmin = cookieStore.get('nv_admin')?.value === process.env.ADMIN_TOKEN
 
   const { data: commentsRaw } = await supabase
     .from('comments')
@@ -86,7 +86,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
       <CommentSection
         questionId={id}
         initialComments={commentsRaw ?? []}
-        adminToken={adminToken}
+        isAdmin={isAdmin}
       />
     </div>
   )

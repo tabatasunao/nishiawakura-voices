@@ -2,8 +2,6 @@
   "nav": {
     "home": "ホーム",
     "propose": "質問を提案する",
-    "login": "ログイン",
-    "logout": "ログアウト",
     "admin": "管理"
   },
   "home": {
@@ -20,12 +18,7 @@
     "selectedBadge": "選定済"
   },
   "question": {
-    "vote": "投票する",
-    "unvote": "投票を取り消す",
-    "alreadyVoted": "投票済み",
-    "loginToVote": "投票するにはログインが必要です",
     "comments": "コメント",
-    "addComment": "コメントを追加",
     "commentPlaceholder": "この質問についてご意見をどうぞ…",
     "submitComment": "投稿する",
     "residentLabel": "村民",
@@ -39,8 +32,7 @@
     "bodyPlaceholder": "候補者に聞きたいことを具体的に書いてください…",
     "categoryLabel": "カテゴリ",
     "submit": "提案する",
-    "success": "質問が提案されました。ありがとうございます！",
-    "loginRequired": "提案するにはログインが必要です"
+    "success": "質問が提案されました。ありがとうございます！"
   },
   "categories": {
     "財政": "財政",
@@ -54,17 +46,6 @@
     "インフラ": "インフラ",
     "脱炭素": "脱炭素",
     "その他": "その他"
-  },
-  "login": {
-    "title": "ログイン / 新規登録",
-    "phoneLabel": "携帯電話番号",
-    "phonePlaceholder": "090-1234-5678",
-    "sendOtp": "認証コードを送信",
-    "otpLabel": "認証コード（SMS）",
-    "otpPlaceholder": "6桁のコードを入力",
-    "verify": "確認する",
-    "otpSent": "SMSに認証コードを送信しました",
-    "back": "戻る"
   },
   "onboarding": {
     "title": "はじめに教えてください",
@@ -91,8 +72,6 @@
   },
   "errors": {
     "generic": "エラーが発生しました。もう一度お試しください。",
-    "alreadyVoted": "この質問にはすでに投票済みです。",
-    "loginRequired": "この操作にはログインが必要です。",
     "commentEmpty": "コメントを入力してください。"
   }
 }

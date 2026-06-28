@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Question } from '@/lib/supabase/types'

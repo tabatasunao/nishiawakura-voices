@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -33,8 +33,8 @@ export default function DeclarationModal({ open, onDeclared }: Props) {
   }
 
   return (
-    <Dialog open={open}>
-      <DialogContent className="sm:max-w-sm" onPointerDownOutside={e => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent className="sm:max-w-sm" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('subtitle')}</DialogDescription>

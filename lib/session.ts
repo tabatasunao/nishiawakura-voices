@@ -18,7 +18,11 @@ export function getSession(): Session | null {
 }
 
 export function saveSession(session: Session): void {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  } catch {
+    // QuotaExceededError or similar — session won't persist but app stays functional
+  }
 }
 
 export function getOrCreateSessionId(): string {

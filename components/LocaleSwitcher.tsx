@@ -1,7 +1,7 @@
 'use client'
 
 import { useLocale } from 'next-intl'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 
 export default function LocaleSwitcher() {
@@ -11,9 +11,7 @@ export default function LocaleSwitcher() {
 
   function switchLocale() {
     const next = locale === 'ja' ? 'en' : 'ja'
-    // Replace /ja/ or /en/ prefix
-    const newPath = pathname.replace(/^\/(ja|en)/, `/${next}`)
-    router.push(newPath)
+    router.replace(pathname, { locale: next })
   }
 
   return (

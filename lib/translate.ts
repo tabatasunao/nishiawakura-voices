@@ -7,13 +7,17 @@ Translate the following Japanese text to natural, formal English suitable for a 
 Preserve the meaning, tone, and structure exactly. Return only the translated text, nothing else.`
 
 export async function translateToEnglish(text: string): Promise<string> {
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: text },
-    ],
-    temperature: 0.2,
-  })
-  return response.choices[0].message.content ?? text
+  try {
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: text },
+      ],
+      temperature: 0.2,
+    })
+    return response.choices[0].message.content ?? text
+  } catch {
+    return text
+  }
 }
