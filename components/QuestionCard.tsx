@@ -8,11 +8,9 @@ import VoteButton from './VoteButton'
 interface Props {
   question: Question
   rank: number
-  userVotedIds: string[]
-  isLoggedIn: boolean
 }
 
-export default function QuestionCard({ question, rank, userVotedIds, isLoggedIn }: Props) {
+export default function QuestionCard({ question, rank }: Props) {
   const t = useTranslations('home')
   const ct = useTranslations('categories')
   const locale = useLocale()
@@ -36,14 +34,10 @@ export default function QuestionCard({ question, rank, userVotedIds, isLoggedIn 
                 {ct(question.category as Parameters<typeof ct>[0])}
               </Badge>
               {isSelected && (
-                <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
-                  {t('selectedBadge')}
-                </Badge>
+                <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">{t('selectedBadge')}</Badge>
               )}
               {isTop10 && !isSelected && (
-                <Badge className="text-xs bg-green-100 text-green-800 border-green-200">
-                  {t('topBadge')}
-                </Badge>
+                <Badge className="text-xs bg-green-100 text-green-800 border-green-200">{t('topBadge')}</Badge>
               )}
             </div>
             <Link href={`/questions/${question.id}`} className="font-semibold text-gray-900 hover:text-[#2D6A4F] leading-snug line-clamp-2">
@@ -57,16 +51,13 @@ export default function QuestionCard({ question, rank, userVotedIds, isLoggedIn 
         <div className="text-xs text-gray-500 flex gap-3">
           <span>{t('voteCount', { count: question.vote_count })}</span>
           {question.resident_vote_count > 0 && (
-            <span className="text-green-700">
-              {t('residentCount', { count: question.resident_vote_count })}
-            </span>
+            <span className="text-green-700">{t('residentCount', { count: question.resident_vote_count })}</span>
           )}
         </div>
         <VoteButton
           questionId={question.id}
           initialVoteCount={question.vote_count}
-          initialVoted={userVotedIds.includes(question.id)}
-          isLoggedIn={isLoggedIn}
+          initialVoted={false}
         />
       </CardFooter>
     </Card>

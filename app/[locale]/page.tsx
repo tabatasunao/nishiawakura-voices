@@ -7,8 +7,6 @@ export default async function HomePage() {
   const t = useTranslations('home')
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-
   const [{ data: activeQuestions }, { data: proposedQuestions }] = await Promise.all([
     supabase
       .from('questions')
@@ -21,15 +19,6 @@ export default async function HomePage() {
       .eq('status', 'proposed')
       .order('vote_count', { ascending: false }),
   ])
-
-  let userVotedIds: string[] = []
-  if (user) {
-    const { data: votes } = await supabase
-      .from('votes')
-      .select('question_id')
-      .eq('user_id', user.id)
-    userVotedIds = votes?.map(v => v.question_id) ?? []
-  }
 
   return (
     <div>
@@ -54,14 +43,7 @@ export default async function HomePage() {
         <TabsContent value="active">
           <ul className="space-y-3">
             {(activeQuestions ?? []).map((q, i) => (
-              <li key={q.id}>
-                <QuestionCard
-                  question={q}
-                  rank={i + 1}
-                  userVotedIds={userVotedIds}
-                  isLoggedIn={!!user}
-                />
-              </li>
+              <li key={q.id}><QuestionCard question={q} rank={i + 1} /></li>
             ))}
           </ul>
         </TabsContent>
@@ -69,14 +51,7 @@ export default async function HomePage() {
         <TabsContent value="proposed">
           <ul className="space-y-3">
             {(proposedQuestions ?? []).map((q, i) => (
-              <li key={q.id}>
-                <QuestionCard
-                  question={q}
-                  rank={i + 1}
-                  userVotedIds={userVotedIds}
-                  isLoggedIn={!!user}
-                />
-              </li>
+              <li key={q.id}><QuestionCard question={q} rank={i + 1} /></li>
             ))}
             {(proposedQuestions?.length ?? 0) === 0 && (
               <p className="text-gray-400 text-sm text-center py-8">提案された質問はまだありません</p>

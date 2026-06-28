@@ -3,27 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json } | 
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string
-          display_name: string | null
-          is_resident: boolean
-          is_admin: boolean
-          created_at: string
-        }
-        Insert: {
-          id: string
-          display_name?: string | null
-          is_resident?: boolean
-          is_admin?: boolean
-          created_at?: string
-        }
-        Update: {
-          display_name?: string | null
-          is_resident?: boolean
-          is_admin?: boolean
-        }
-      }
       questions: {
         Row: {
           id: string
@@ -36,7 +15,7 @@ export type Database = {
           status: 'active' | 'proposed' | 'archived' | 'selected'
           vote_count: number
           resident_vote_count: number
-          proposed_by: string | null
+          proposed_by_session: string | null
           created_at: string
         }
         Insert: {
@@ -50,7 +29,7 @@ export type Database = {
           status?: 'active' | 'proposed' | 'archived' | 'selected'
           vote_count?: number
           resident_vote_count?: number
-          proposed_by?: string | null
+          proposed_by_session?: string | null
           created_at?: string
         }
         Update: {
@@ -68,13 +47,15 @@ export type Database = {
         Row: {
           id: string
           question_id: string
-          user_id: string
+          session_id: string
+          is_resident: boolean
           created_at: string
         }
         Insert: {
           id?: string
           question_id: string
-          user_id: string
+          session_id: string
+          is_resident?: boolean
           created_at?: string
         }
         Update: never
@@ -83,7 +64,9 @@ export type Database = {
         Row: {
           id: string
           question_id: string
-          user_id: string
+          session_id: string
+          display_name: string | null
+          is_resident: boolean
           body: string
           body_en_cache: string | null
           created_at: string
@@ -91,7 +74,9 @@ export type Database = {
         Insert: {
           id?: string
           question_id: string
-          user_id: string
+          session_id: string
+          display_name?: string | null
+          is_resident?: boolean
           body: string
           body_en_cache?: string | null
           created_at?: string
@@ -104,7 +89,6 @@ export type Database = {
   }
 }
 
-export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Question = Database['public']['Tables']['questions']['Row']
 export type Vote = Database['public']['Tables']['votes']['Row']
 export type Comment = Database['public']['Tables']['comments']['Row']

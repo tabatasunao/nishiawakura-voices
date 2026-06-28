@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
+import { cookies } from 'next/headers'
 import VoteButton from '@/components/VoteButton'
 import CommentSection from '@/components/CommentSection'
 
@@ -22,7 +23,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
     const needsTitle = !question.title_en_cache
     const needsBody = !question.body_en_cache
     if (needsTitle || needsBody) {
-      const adminClient = await createAdminClient()
+      const adminClient = createAdminClient()
       const [titleEn, bodyEn] = await Promise.all([
         needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
         needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
@@ -36,24 +37,15 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const title = locale === 'en' && question.title_en_cache ? question.title_en_cache : question.title
   const body = locale === 'en' && question.body_en_cache ? question.body_en_cache : question.body
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let userVoted = false
-  let isAdmin = false
-  let profile = null
-  if (user) {
-    const [voteRes, profileRes] = await Promise.all([
-      supabase.from('votes').select('id').eq('question_id', id).eq('user_id', user.id).single(),
-      supabase.from('profiles').select('is_admin, display_name, is_resident').eq('id', user.id).single(),
-    ])
-    userVoted = !!voteRes.data
-    isAdmin = profileRes.data?.is_admin ?? false
-    profile = profileRes.data
-  }
+  // Check if requester is admin (via cookie)
+  const cookieStore = await cookies()
+  const adminCookie = cookieStore.get('nv_admin')?.value
+  const isAdmin = adminCookie === process.env.ADMIN_TOKEN
+  const adminToken = isAdmin ? process.env.ADMIN_TOKEN : undefined
 
   const { data: commentsRaw } = await supabase
     .from('comments')
-    .select('*, profiles(display_name, is_resident)')
+    .select('*')
     .eq('question_id', id)
     .order('created_at', { ascending: true })
 
@@ -86,18 +78,15 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
           <VoteButton
             questionId={question.id}
             initialVoteCount={question.vote_count}
-            initialVoted={userVoted}
-            isLoggedIn={!!user}
+            initialVoted={false}
           />
         </div>
       </div>
 
       <CommentSection
         questionId={id}
-        initialComments={(commentsRaw as any) ?? []}
-        isLoggedIn={!!user}
-        currentUserId={user?.id}
-        isAdmin={isAdmin}
+        initialComments={commentsRaw ?? []}
+        adminToken={adminToken}
       />
     </div>
   )
