@@ -1,14 +1,16 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import AdminTable from '@/components/AdminTable'
 
-export default async function AdminPage() {
-  const t = useTranslations('admin')
+export default async function AdminPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('admin')
+
   const cookieStore = await cookies()
   const adminCookie = cookieStore.get('nv_admin')?.value
-
   if (adminCookie !== process.env.ADMIN_TOKEN) redirect('/')
 
   const supabase = await createClient()

@@ -1,9 +1,9 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import LocaleSwitcher from './LocaleSwitcher'
 
-export default function NavBar() {
-  const t = useTranslations('nav')
+export default async function NavBar() {
+  const t = await getTranslations('nav')
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto max-w-3xl px-4 h-14 flex items-center justify-between gap-4">

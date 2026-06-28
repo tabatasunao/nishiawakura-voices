@@ -1,10 +1,12 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/server'
 import QuestionCard from '@/components/QuestionCard'
 
-export default async function HomePage() {
-  const t = useTranslations('home')
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('home')
   const supabase = await createClient()
 
   const [{ data: activeQuestions }, { data: proposedQuestions }] = await Promise.all([
@@ -43,7 +45,7 @@ export default async function HomePage() {
         <TabsContent value="active">
           <ul className="space-y-3">
             {(activeQuestions ?? []).map((q, i) => (
-              <li key={q.id}><QuestionCard question={q} rank={i + 1} /></li>
+              <li key={q.id}><QuestionCard question={q} rank={i + 1} locale={locale} /></li>
             ))}
           </ul>
         </TabsContent>
@@ -51,7 +53,7 @@ export default async function HomePage() {
         <TabsContent value="proposed">
           <ul className="space-y-3">
             {(proposedQuestions ?? []).map((q, i) => (
-              <li key={q.id}><QuestionCard question={q} rank={i + 1} /></li>
+              <li key={q.id}><QuestionCard question={q} rank={i + 1} locale={locale} /></li>
             ))}
             {(proposedQuestions?.length ?? 0) === 0 && (
               <p className="text-gray-400 text-sm text-center py-8">提案された質問はまだありません</p>

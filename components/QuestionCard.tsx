@@ -1,4 +1,4 @@
-import { useTranslations, useLocale } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,12 +8,12 @@ import VoteButton from './VoteButton'
 interface Props {
   question: Question
   rank: number
+  locale: string
 }
 
-export default function QuestionCard({ question, rank }: Props) {
-  const t = useTranslations('home')
-  const ct = useTranslations('categories')
-  const locale = useLocale()
+export default async function QuestionCard({ question, rank, locale }: Props) {
+  const t = await getTranslations('home')
+  const ct = await getTranslations('categories')
 
   const title = locale === 'en' && question.title_en_cache ? question.title_en_cache : question.title
   const isTop10 = rank <= 10

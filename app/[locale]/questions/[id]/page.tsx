@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { useTranslations, useLocale } from 'next-intl'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { Badge } from '@/components/ui/badge'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
@@ -10,8 +10,9 @@ import CommentSection from '@/components/CommentSection'
 
 export default async function QuestionPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   const { id, locale } = await params
-  const t = useTranslations('question')
-  const ct = useTranslations('categories')
+  setRequestLocale(locale)
+  const t = await getTranslations('question')
+  const ct = await getTranslations('categories')
   const supabase = await createClient()
 
   const { data: question } = await supabase.from('questions').select('*').eq('id', id).single()
