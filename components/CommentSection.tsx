@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import ResidentBadge from './ResidentBadge'
 import DeclarationModal from './DeclarationModal'
-import { addComment, deleteComment } from '@/app/actions'
+import { addComment, deleteComment, polishText } from '@/app/actions'
 import { getSession, type Session } from '@/lib/session'
 import type { Comment } from '@/lib/supabase/types'
 
@@ -22,10 +22,12 @@ interface Props {
 export default function CommentSection({ questionId, initialComments, isAdmin }: Props) {
   const t = useTranslations('question')
   const tErr = useTranslations('errors')
+  const tP = useTranslations('polish')
   const locale = useLocale()
   const [comments, setComments] = useState(initialComments)
   const [body, setBody] = useState('')
   const [isPending, startTransition] = useTransition()
+  const [isPolishing, setIsPolishing] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [pendingSubmit, setPendingSubmit] = useState(false)
   const [mySession, setMySession] = useState<Session | null>(null)
@@ -75,6 +77,15 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
       setPendingSubmit(false)
       doSubmit(session)
     }
+  }
+
+  async function handlePolish() {
+    if (!body.trim()) return
+    setIsPolishing(true)
+    const result = await polishText(body, 'comment')
+    setIsPolishing(false)
+    if (result.polished) setBody(result.polished)
+    else toast.error(tP('error'))
   }
 
   function handleDelete(commentId: string, sessionId: string) {
@@ -134,9 +145,19 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
           className="resize-none"
           autoCorrect="off"
         />
-        <div className="flex items-center justify-between">
-          <span className={`text-xs ${counterColour}`}>{bodyLength}/500</span>
-          <Button type="submit" disabled={isPending} size="sm" className="min-h-[44px] bg-forest hover:bg-forest-dark text-white">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPolishing || !body.trim()}
+            onClick={handlePolish}
+            className="min-h-[44px] text-xs shrink-0"
+          >
+            {isPolishing ? tP('polishing') : tP('button')}
+          </Button>
+          <span className={`text-xs flex-1 text-right ${counterColour}`}>{bodyLength}/500</span>
+          <Button type="submit" disabled={isPending || isPolishing} size="sm" className="min-h-[44px] bg-forest hover:bg-forest-dark text-white shrink-0">
             {t('submitComment')}
           </Button>
         </div>

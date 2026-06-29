@@ -4,9 +4,41 @@ import { timingSafeEqual } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { after } from 'next/server'
 import { cookies } from 'next/headers'
+import OpenAI from 'openai'
 import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
 import { isValidTagList } from '@/lib/tags'
+
+const POLISH_PROMPTS = {
+  comment: 'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、読みやすく丁寧な日本語の文章に整えてください。元の意図・主張は変えずに、完成した文章として仕上げてください。整えたテキストのみを返してください。',
+  title:   'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、候補者への政策質問として簡潔でわかりやすいタイトルに整えてください。元の意図を変えずに、できるだけ短くまとめてください。整えたテキストのみを返してください。',
+  body:    'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、候補者への政策質問として読みやすく丁寧な日本語の本文に整えてください。元の意図・主張は変えずに、完成した文章として仕上げてください。整えたテキストのみを返してください。',
+}
+
+export async function polishText(roughText: string, type: keyof typeof POLISH_PROMPTS): Promise<{ polished?: string; error?: string }> {
+  if (!process.env.OPENAI_API_KEY) return { error: 'unavailable' }
+  const trimmed = roughText.trim()
+  if (!trimmed || trimmed.length > 1000) return { error: 'invalid' }
+  if (!(type in POLISH_PROMPTS)) return { error: 'invalid' }
+
+  try {
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: POLISH_PROMPTS[type] },
+        { role: 'user', content: trimmed },
+      ],
+      temperature: 0.4,
+      max_tokens: type === 'title' ? 100 : 500,
+    })
+    const result = response.choices[0].message.content?.trim()
+    if (!result) return { error: 'empty_response' }
+    return { polished: result }
+  } catch {
+    return { error: 'failed' }
+  }
+}
 
 function isValidUUID(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)

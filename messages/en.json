@@ -99,6 +99,11 @@
       "archived": "Archived"
     }
   },
+  "polish": {
+    "button": "✨ Polish",
+    "polishing": "Polishing…",
+    "error": "Could not polish text. Please try again."
+  },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "commentEmpty": "Please enter a comment.",

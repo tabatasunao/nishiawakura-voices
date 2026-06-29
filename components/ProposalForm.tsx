@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { proposeQuestion } from '@/app/actions'
+import { proposeQuestion, polishText } from '@/app/actions'
 import { SUGGESTED_TAGS, MAX_TAGS, MAX_TAG_LENGTH, isSuggestedTag } from '@/lib/tags'
 import { getSession, type Session } from '@/lib/session'
 import DeclarationModal from './DeclarationModal'
@@ -17,6 +17,7 @@ export default function ProposalForm() {
   const t = useTranslations('propose')
   const tt = useTranslations('tags')
   const tErr = useTranslations('errors')
+  const tP = useTranslations('polish')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [title, setTitle] = useState('')
@@ -24,7 +25,27 @@ export default function ProposalForm() {
   const [tags, setTags] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [polishingTitle, setPolishingTitle] = useState(false)
+  const [polishingBody, setPolishingBody] = useState(false)
   const customRef = useRef<HTMLInputElement>(null)
+
+  async function handlePolishTitle() {
+    if (!title.trim()) return
+    setPolishingTitle(true)
+    const result = await polishText(title, 'title')
+    setPolishingTitle(false)
+    if (result.polished) setTitle(result.polished)
+    else toast.error(tP('error'))
+  }
+
+  async function handlePolishBody() {
+    if (!body.trim()) return
+    setPolishingBody(true)
+    const result = await polishText(body, 'body')
+    setPolishingBody(false)
+    if (result.polished) setBody(result.polished)
+    else toast.error(tP('error'))
+  }
 
   function toggleSuggested(tag: string) {
     setTags(prev =>
@@ -72,7 +93,17 @@ export default function ProposalForm() {
     <>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-1.5">
-          <Label htmlFor="title">{t('titleLabel')}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="title">{t('titleLabel')}</Label>
+            <button
+              type="button"
+              disabled={polishingTitle || !title.trim()}
+              onClick={handlePolishTitle}
+              className="text-xs text-forest hover:text-forest-dark disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {polishingTitle ? tP('polishing') : tP('button')}
+            </button>
+          </div>
           <Input
             id="title"
             value={title}
@@ -87,7 +118,17 @@ export default function ProposalForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="body">{t('bodyLabel')}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="body">{t('bodyLabel')}</Label>
+            <button
+              type="button"
+              disabled={polishingBody || !body.trim()}
+              onClick={handlePolishBody}
+              className="text-xs text-forest hover:text-forest-dark disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {polishingBody ? tP('polishing') : tP('button')}
+            </button>
+          </div>
           <Textarea
             id="body"
             value={body}
@@ -178,7 +219,7 @@ export default function ProposalForm() {
 
         <Button
           type="submit"
-          disabled={isPending || !title.trim() || !body.trim() || tags.length === 0}
+          disabled={isPending || polishingTitle || polishingBody || !title.trim() || !body.trim() || tags.length === 0}
           className="w-full min-h-[44px] bg-forest hover:bg-forest-dark text-white"
         >
           {isPending ? t('submitting') : t('submit')}
