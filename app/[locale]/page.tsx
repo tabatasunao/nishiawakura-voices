@@ -12,12 +12,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const [{ data: activeQuestions }, { data: proposedQuestions }] = await Promise.all([
     supabase
       .from('questions')
-      .select('id, number, title, title_en_cache, category, status, vote_count, resident_vote_count')
+      .select('id, number, title, title_en_cache, tags, status, vote_count, resident_vote_count')
       .in('status', ['active', 'selected'])
       .order('vote_count', { ascending: false }),
     supabase
       .from('questions')
-      .select('id, number, title, title_en_cache, category, status, vote_count, resident_vote_count')
+      .select('id, number, title, title_en_cache, tags, status, vote_count, resident_vote_count')
       .eq('status', 'proposed')
       .order('vote_count', { ascending: false }),
   ])

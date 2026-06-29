@@ -38,7 +38,7 @@ export default function AdminTable({ questions: initialQuestions }: Props) {
     const date = new Date().toISOString().slice(0, 10)
     a.download = `nishiawakura-koukaiShitsumonjo-${date}.md`
     a.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => URL.revokeObjectURL(url), 0)
   }
 
   const selectedCount = questions.filter(q => q.status === 'selected').length
@@ -59,7 +59,7 @@ export default function AdminTable({ questions: initialQuestions }: Props) {
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm text-gray-900 line-clamp-1">{q.title}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                {t('votesMeta', { count: q.vote_count })} | {t('residentVotesMeta', { count: q.resident_vote_count })} | {q.category}
+                {t('votesMeta', { count: q.vote_count })} | {t('residentVotesMeta', { count: q.resident_vote_count })} | {q.tags.join(', ')}
               </p>
             </div>
             <div className="flex gap-2 items-center flex-shrink-0 flex-wrap justify-end">

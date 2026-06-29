@@ -2,10 +2,11 @@
 
 import { timingSafeEqual } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
-import { VALID_CATEGORIES } from '@/lib/categories'
+import { isValidTagList } from '@/lib/tags'
 
 function isValidUUID(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
@@ -70,32 +71,42 @@ export async function addComment(questionId: string, sessionId: string, body: st
 
   if (error) return { error: error.message }
 
-  translateToEnglish(body.trim()).then(translated =>
-    createAdminClient().from('comments').update({ body_en_cache: translated }).eq('id', comment.id)
-  ).catch(() => {})
+  if (process.env.OPENAI_API_KEY) {
+    after(async () => {
+      try {
+        const translated = await translateToEnglish(body.trim())
+        await createAdminClient().from('comments').update({ body_en_cache: translated }).eq('id', comment.id)
+      } catch {}
+    })
+  }
 
   revalidatePath('/', 'layout')
   return { success: true, comment }
 }
 
-export async function proposeQuestion(title: string, body: string, category: string, sessionId: string) {
+export async function proposeQuestion(title: string, body: string, tags: string[], sessionId: string) {
   if (!isValidUUID(sessionId)) return { error: 'invalid' }
   if (!title.trim() || title.trim().length > 100) return { error: 'invalid' }
   if (!body.trim() || body.length > 1000) return { error: 'invalid' }
-  if (!VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number])) return { error: 'invalid' }
+  if (!isValidTagList(tags)) return { error: 'invalid' }
 
   const db = createAdminClient()
   const { data: question, error } = await db
     .from('questions')
-    .insert({ title: title.trim(), body: body.trim(), category, status: 'proposed', proposed_by_session: sessionId })
+    .insert({ title: title.trim(), body: body.trim(), tags, status: 'proposed', proposed_by_session: sessionId })
     .select()
     .single()
 
   if (error) return { error: error.message }
 
-  Promise.all([translateToEnglish(title), translateToEnglish(body)]).then(([t, b]) =>
-    createAdminClient().from('questions').update({ title_en_cache: t, body_en_cache: b }).eq('id', question.id)
-  ).catch(() => {})
+  if (process.env.OPENAI_API_KEY) {
+    after(async () => {
+      try {
+        const [titleEn, bodyEn] = await Promise.all([translateToEnglish(title), translateToEnglish(body)])
+        await createAdminClient().from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', question.id)
+      } catch {}
+    })
+  }
 
   revalidatePath('/', 'layout')
   return { success: true }
