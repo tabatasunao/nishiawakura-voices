@@ -20,7 +20,7 @@ export default async function QuestionCard({ question, rank, locale }: Props) {
   const isSelected = question.status === 'selected'
 
   return (
-    <Card className="hover:shadow-md transition-shadow active:scale-[0.99]">
+    <Card className="hover:shadow-md transition-shadow motion-safe:active:scale-[0.99]">
       <CardContent className="pt-4 pb-2">
         <div className="flex items-start gap-3">
           <span className={`text-2xl font-bold tabular-nums w-8 text-center flex-shrink-0 ${

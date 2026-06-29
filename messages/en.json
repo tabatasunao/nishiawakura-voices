@@ -16,7 +16,8 @@
     "commentCount": "{count} comments",
     "topBadge": "TOP10",
     "selectedBadge": "Selected",
-    "noProposals": "No proposed questions yet"
+    "noProposals": "No proposed questions yet",
+    "noActiveQuestions": "No active questions at this time"
   },
   "question": {
     "comments": "Comments",
@@ -27,7 +28,11 @@
     "voteCount": "{count} votes",
     "residentVoteDetail": "incl. {count} residents",
     "anonymous": "Anonymous",
-    "delete": "Delete"
+    "delete": "Delete",
+    "deleteCommentBy": "Delete comment by {name}",
+    "vote": "Vote",
+    "unvote": "Unvote",
+    "voting": "Voting…"
   },
   "propose": {
     "title": "Propose a New Question",
@@ -75,6 +80,8 @@
     "exportTitle": "Export Candidate Inquiry Letter",
     "export": "Export as Markdown",
     "selectedCount": "Selected: {count}/{total}",
+    "votesMeta": "{count} votes",
+    "residentVotesMeta": "{count} resident votes",
     "voteCount": "Votes",
     "residentVotes": "Resident Votes",
     "status": "Status",

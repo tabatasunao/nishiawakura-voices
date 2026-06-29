@@ -31,6 +31,8 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
   const [mySession, setMySession] = useState<Session | null>(null)
 
   const dateLocale = locale === 'ja' ? ja : undefined
+  const bodyLength = body.length
+  const counterColour = bodyLength > 450 ? 'text-red-500' : bodyLength > 400 ? 'text-amber-500' : 'text-gray-500'
 
   useEffect(() => {
     setMySession(getSession())
@@ -95,7 +97,7 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
 
           return (
             <li key={comment.id} className="flex gap-3 text-sm">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-500 text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-500 text-xs font-bold" aria-hidden="true">
                 {name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
@@ -108,6 +110,7 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
                   {(isOwn || isAdmin) && (
                     <button
                       onClick={() => handleDelete(comment.id, comment.session_id)}
+                      aria-label={t('deleteCommentBy', { name })}
                       className="ml-auto p-2 -m-2 text-gray-500 hover:text-red-600 text-xs"
                     >
                       {t('delete')}
@@ -129,9 +132,10 @@ export default function CommentSection({ questionId, initialComments, isAdmin }:
           maxLength={500}
           rows={3}
           className="resize-none"
+          autoCorrect="off"
         />
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">{body.length}/500</span>
+          <span className={`text-xs ${counterColour}`}>{bodyLength}/500</span>
           <Button type="submit" disabled={isPending} size="sm" className="min-h-[44px] bg-forest hover:bg-forest-dark text-white">
             {t('submitComment')}
           </Button>

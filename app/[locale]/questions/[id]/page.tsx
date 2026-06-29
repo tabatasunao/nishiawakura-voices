@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'crypto'
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
 import { cookies } from 'next/headers'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
@@ -21,21 +22,27 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const ct = await getTranslations('categories')
   const supabase = await createClient()
 
-  const { data: question } = await supabase.from('questions').select('*').eq('id', id).single()
+  const [{ data: question }, { data: commentsRaw }] = await Promise.all([
+    supabase.from('questions').select('*').eq('id', id).single(),
+    supabase.from('comments').select('*').eq('question_id', id).order('created_at', { ascending: true }),
+  ])
   if (!question) notFound()
 
-  // Fire-and-forget translation on first EN visit — page renders immediately with Japanese fallback
+  // Schedule translation after response is sent so it doesn't block page load
   if (locale === 'en' && process.env.OPENAI_API_KEY) {
     const needsTitle = !question.title_en_cache
     const needsBody = !question.body_en_cache
     if (needsTitle || needsBody) {
       const adminClient = createAdminClient()
-      Promise.all([
-        needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
-        needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
-      ]).then(([titleEn, bodyEn]) =>
-        adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
-      ).catch(() => {})
+      after(async () => {
+        try {
+          const [titleEn, bodyEn] = await Promise.all([
+            needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
+            needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
+          ])
+          await adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
+        } catch {}
+      })
     }
   }
 
@@ -45,12 +52,6 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const cookieStore = await cookies()
   const isAdmin = !!process.env.ADMIN_TOKEN &&
     safeTokenEqual(cookieStore.get('nv_admin')?.value, process.env.ADMIN_TOKEN)
-
-  const { data: commentsRaw } = await supabase
-    .from('comments')
-    .select('*')
-    .eq('question_id', id)
-    .order('created_at', { ascending: true })
 
   return (
     <div>

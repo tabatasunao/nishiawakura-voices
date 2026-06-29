@@ -60,7 +60,7 @@ export default function ProposalForm() {
             autoCorrect="off"
             autoCapitalize="none"
           />
-          <p className="text-xs text-gray-500 text-right">{title.length}/100</p>
+          <p className={`text-xs text-right ${title.length > 90 ? 'text-red-500' : title.length > 80 ? 'text-amber-500' : 'text-gray-500'}`}>{title.length}/100</p>
         </div>
 
         <div className="space-y-1.5">
@@ -76,7 +76,7 @@ export default function ProposalForm() {
             className="resize-none"
             autoCorrect="off"
           />
-          <p className="text-xs text-gray-500 text-right">{body.length}/1000</p>
+          <p className={`text-xs text-right ${body.length > 950 ? 'text-red-500' : body.length > 900 ? 'text-amber-500' : 'text-gray-500'}`}>{body.length}/1000</p>
         </div>
 
         <div className="space-y-1.5">

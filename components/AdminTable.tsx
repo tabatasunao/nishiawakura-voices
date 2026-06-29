@@ -59,13 +59,14 @@ export default function AdminTable({ questions: initialQuestions }: Props) {
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm text-gray-900 line-clamp-1">{q.title}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                {q.vote_count}票 | 村民{q.resident_vote_count}票 | {q.category}
+                {t('votesMeta', { count: q.vote_count })} | {t('residentVotesMeta', { count: q.resident_vote_count })} | {q.category}
               </p>
             </div>
             <div className="flex gap-2 items-center flex-shrink-0 flex-wrap justify-end">
               <Badge variant="outline" className={`text-xs ${
                 q.status === 'selected' ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                q.status === 'proposed' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-gray-100 text-gray-600'
+                q.status === 'proposed' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                q.status === 'archived' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-gray-100 text-gray-600'
               }`}>{t(`statusLabels.${q.status}` as Parameters<typeof t>[0])}</Badge>
               {q.status === 'selected' ? (
                 <Button size="sm" variant="outline" disabled={isPending} onClick={() => handleStatus(q.id, 'active')} className="text-xs h-9">{t('deselectTop10')}</Button>

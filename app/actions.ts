@@ -80,7 +80,7 @@ export async function addComment(questionId: string, sessionId: string, body: st
 
 export async function proposeQuestion(title: string, body: string, category: string, sessionId: string) {
   if (!isValidUUID(sessionId)) return { error: 'invalid' }
-  if (!title.trim() || title.length > 100) return { error: 'invalid' }
+  if (!title.trim() || title.trim().length > 100) return { error: 'invalid' }
   if (!body.trim() || body.length > 1000) return { error: 'invalid' }
   if (!VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number])) return { error: 'invalid' }
 

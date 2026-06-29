@@ -16,7 +16,8 @@
     "commentCount": "{count}件のコメント",
     "topBadge": "TOP10",
     "selectedBadge": "選定済",
-    "noProposals": "提案された質問はまだありません"
+    "noProposals": "提案された質問はまだありません",
+    "noActiveQuestions": "現在公開中の質問はありません"
   },
   "question": {
     "comments": "コメント",
@@ -27,7 +28,11 @@
     "voteCount": "{count}票",
     "residentVoteDetail": "うち村民{count}人",
     "anonymous": "匿名",
-    "delete": "削除"
+    "delete": "削除",
+    "deleteCommentBy": "{name}のコメントを削除",
+    "vote": "投票する",
+    "unvote": "投票を取り消す",
+    "voting": "投票中…"
   },
   "propose": {
     "title": "新しい質問を提案する",
@@ -75,6 +80,8 @@
     "exportTitle": "公開質問状をエクスポート",
     "export": "マークダウンでエクスポート",
     "selectedCount": "選定済み: {count}/{total}",
+    "votesMeta": "{count}票",
+    "residentVotesMeta": "村民{count}票",
     "voteCount": "票数",
     "residentVotes": "村民票",
     "status": "ステータス",

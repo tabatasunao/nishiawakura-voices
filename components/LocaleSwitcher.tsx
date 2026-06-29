@@ -24,7 +24,7 @@ export default function LocaleSwitcher() {
     >
       <span className="font-bold text-forest">{locale.toUpperCase()}</span>
       <span className="text-gray-300">|</span>
-      <span className="text-gray-400">{locale === 'ja' ? 'EN' : 'JA'}</span>
+      <span className="text-gray-500">{locale === 'ja' ? 'EN' : 'JA'}</span>
     </Button>
   )
 }

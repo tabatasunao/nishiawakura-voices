@@ -15,7 +15,8 @@ interface Props {
 }
 
 export default function VoteButton({ questionId, initialVoteCount }: Props) {
-  const t = useTranslations()
+  const t = useTranslations('question')
+  const tErr = useTranslations('errors')
   const [isPending, startTransition] = useTransition()
   const [voted, setVotedState] = useState(false)
   const [count, setCount] = useState(initialVoteCount)
@@ -39,7 +40,7 @@ export default function VoteButton({ questionId, initialVoteCount }: Props) {
         setVotedState(prevVoted)
         setCount(prevCount)
         setVoted(questionId, prevVoted)
-        toast.error(t('errors.generic'))
+        toast.error(tErr('generic'))
       }
     })
   }
@@ -58,6 +59,8 @@ export default function VoteButton({ questionId, initialVoteCount }: Props) {
     doVote(session)
   }
 
+  const ariaLabel = isPending ? t('voting') : voted ? t('unvote') : t('vote')
+
   return (
     <>
       <Button
@@ -65,16 +68,19 @@ export default function VoteButton({ questionId, initialVoteCount }: Props) {
         disabled={isPending}
         variant={voted ? 'default' : 'outline'}
         size="sm"
-        className={`gap-1.5 min-w-[80px] min-h-[44px] transition-all active:scale-95 ${
+        aria-label={ariaLabel}
+        aria-pressed={voted}
+        aria-busy={isPending}
+        className={`gap-1.5 min-w-[80px] min-h-[44px] transition-all motion-safe:active:scale-95 ${
           voted
             ? 'bg-forest hover:bg-forest-dark text-white border-forest'
             : 'border-forest text-forest hover:bg-green-50'
         }`}
       >
         {isPending ? (
-          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <span className="motion-safe:inline-block h-3.5 w-3.5 motion-safe:animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
         ) : (
-          <span>{voted ? '✓' : '▲'}</span>
+          <span aria-hidden="true">{voted ? '✓' : '▲'}</span>
         )}
         <span>{count}</span>
       </Button>

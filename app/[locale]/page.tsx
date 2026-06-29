@@ -48,6 +48,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <li key={q.id}><QuestionCard question={q as Parameters<typeof QuestionCard>[0]['question']} rank={i + 1} locale={locale} /></li>
             ))}
           </ul>
+          {(activeQuestions?.length ?? 0) === 0 && (
+            <p className="text-gray-400 text-sm text-center py-8">{t('noActiveQuestions')}</p>
+          )}
         </TabsContent>
 
         <TabsContent value="proposed">

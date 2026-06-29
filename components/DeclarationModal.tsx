@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { useTranslations } from 'next-intl'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -17,6 +17,9 @@ interface Props {
 
 export default function DeclarationModal({ open, onDeclared, onCancel }: Props) {
   const t = useTranslations('onboarding')
+  const uid = useId()
+  const yesId = `${uid}-yes`
+  const noId = `${uid}-no`
   const [isResident, setIsResident] = useState<'yes' | 'no' | null>(null)
   const [displayName, setDisplayName] = useState('')
 
@@ -52,20 +55,20 @@ export default function DeclarationModal({ open, onDeclared, onCancel }: Props) 
             <Label className="text-sm font-medium">{t('residentQuestion')}</Label>
             <RadioGroup value={isResident ?? ''} onValueChange={v => setIsResident(v as 'yes' | 'no')}>
               <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-forest cursor-pointer transition-colors">
-                <RadioGroupItem value="yes" id="yes" />
-                <Label htmlFor="yes" className="cursor-pointer flex-1 font-normal">{t('yes')}</Label>
+                <RadioGroupItem value="yes" id={yesId} />
+                <Label htmlFor={yesId} className="cursor-pointer flex-1 font-normal">{t('yes')}</Label>
               </div>
               <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-forest cursor-pointer transition-colors">
-                <RadioGroupItem value="no" id="no" />
-                <Label htmlFor="no" className="cursor-pointer flex-1 font-normal">{t('no')}</Label>
+                <RadioGroupItem value="no" id={noId} />
+                <Label htmlFor={noId} className="cursor-pointer flex-1 font-normal">{t('no')}</Label>
               </div>
             </RadioGroup>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="name">{t('nameLabel')}</Label>
+            <Label htmlFor={`${uid}-name`}>{t('nameLabel')}</Label>
             <Input
-              id="name"
+              id={`${uid}-name`}
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
               placeholder={t('namePlaceholder')}

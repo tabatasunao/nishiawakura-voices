@@ -20,7 +20,7 @@ export function proxy(request: NextRequest) {
       return response
     }
 
-    if (adminCookie !== process.env.ADMIN_TOKEN) {
+    if (!process.env.ADMIN_TOKEN || adminCookie !== process.env.ADMIN_TOKEN) {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
