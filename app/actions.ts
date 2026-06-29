@@ -9,32 +9,76 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
 import { isValidTagList } from '@/lib/tags'
 
-const POLISH_PROMPTS = {
-  comment: 'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、読みやすく丁寧な日本語の文章に整えてください。元の意図・主張は変えずに、完成した文章として仕上げてください。整えたテキストのみを返してください。',
-  title:   'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、候補者への政策質問として簡潔でわかりやすいタイトルに整えてください。元の意図を変えずに、できるだけ短くまとめてください。整えたテキストのみを返してください。',
-  body:    'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、候補者への政策質問として読みやすく丁寧な日本語の本文に整えてください。元の意図・主張は変えずに、完成した文章として仕上げてください。整えたテキストのみを返してください。',
-}
+const SUGGESTED_TAG_LIST = '財政, 人口, 産業, 林業, 農業, 観光, 教育, 医療福祉, インフラ, 脱炭素, その他'
 
-export async function polishText(roughText: string, type: keyof typeof POLISH_PROMPTS): Promise<{ polished?: string; error?: string }> {
+const POLISH_COMMENT_PROMPT = 'あなたは市民参加プラットフォームのライティングアシスタントです。ユーザーの粗削りな入力を、読みやすく丁寧な日本語の文章に整えてください。元の意図・主張は変えずに、完成した文章として仕上げてください。整えたテキストのみを返してください。'
+
+export async function polishText(roughText: string, type: 'comment'): Promise<{ polished?: string; error?: string }> {
   if (!process.env.OPENAI_API_KEY) return { error: 'unavailable' }
   const trimmed = roughText.trim()
   if (!trimmed || trimmed.length > 1000) return { error: 'invalid' }
-  if (!(type in POLISH_PROMPTS)) return { error: 'invalid' }
 
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
     const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: POLISH_PROMPTS[type] },
+        { role: 'system', content: POLISH_COMMENT_PROMPT },
         { role: 'user', content: trimmed },
       ],
       temperature: 0.4,
-      max_tokens: type === 'title' ? 100 : 500,
+      max_tokens: 500,
     })
     const result = response.choices[0].message.content?.trim()
     if (!result) return { error: 'empty_response' }
     return { polished: result }
+  } catch {
+    return { error: 'failed' }
+  }
+}
+
+export async function generateProposal(roughText: string): Promise<{
+  title?: string; body?: string; tags?: string[]; error?: string
+}> {
+  if (!process.env.OPENAI_API_KEY) return { error: 'unavailable' }
+  const trimmed = roughText.trim()
+  if (!trimmed || trimmed.length > 2000) return { error: 'invalid' }
+
+  const systemPrompt = `あなたは西粟倉村の選挙公開質問状プラットフォームのアシスタントです。
+村民が候補者に聞きたいことを粗削りに入力します。
+それをもとに、以下のJSON形式で政策質問を生成してください。
+
+{
+  "title": "質問タイトル（100文字以内、簡潔なテーマ）",
+  "body": "候補者への質問本文（丁寧で具体的な日本語、500文字以内）",
+  "tags": ["タグ"] // 次のリストから内容に合う1〜3個を選ぶ: ${SUGGESTED_TAG_LIST}
+}
+
+JSONのみ返してください。説明は不要です。`
+
+  try {
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: trimmed },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.5,
+    })
+    const raw = response.choices[0].message.content?.trim()
+    if (!raw) return { error: 'empty_response' }
+
+    const parsed = JSON.parse(raw)
+    const title = typeof parsed.title === 'string' ? parsed.title.slice(0, 100).trim() : null
+    const body = typeof parsed.body === 'string' ? parsed.body.slice(0, 1000).trim() : null
+    const tags = Array.isArray(parsed.tags)
+      ? parsed.tags.filter((t: unknown) => typeof t === 'string').slice(0, 5) as string[]
+      : []
+
+    if (!title || !body) return { error: 'invalid_response' }
+    return { title, body, tags }
   } catch {
     return { error: 'failed' }
   }

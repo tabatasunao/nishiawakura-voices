@@ -8,43 +8,43 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { proposeQuestion, polishText } from '@/app/actions'
+import { proposeQuestion, generateProposal } from '@/app/actions'
 import { SUGGESTED_TAGS, MAX_TAGS, MAX_TAG_LENGTH, isSuggestedTag } from '@/lib/tags'
 import { getSession, type Session } from '@/lib/session'
 import DeclarationModal from './DeclarationModal'
+
+type Step = 'input' | 'review'
 
 export default function ProposalForm() {
   const t = useTranslations('propose')
   const tt = useTranslations('tags')
   const tErr = useTranslations('errors')
-  const tP = useTranslations('polish')
   const router = useRouter()
+  const [step, setStep] = useState<Step>('input')
   const [isPending, startTransition] = useTransition()
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [roughText, setRoughText] = useState('')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [customInput, setCustomInput] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [polishingTitle, setPolishingTitle] = useState(false)
-  const [polishingBody, setPolishingBody] = useState(false)
   const customRef = useRef<HTMLInputElement>(null)
 
-  async function handlePolishTitle() {
-    if (!title.trim()) return
-    setPolishingTitle(true)
-    const result = await polishText(title, 'title')
-    setPolishingTitle(false)
-    if (result.polished) setTitle(result.polished)
-    else toast.error(tP('error'))
-  }
-
-  async function handlePolishBody() {
-    if (!body.trim()) return
-    setPolishingBody(true)
-    const result = await polishText(body, 'body')
-    setPolishingBody(false)
-    if (result.polished) setBody(result.polished)
-    else toast.error(tP('error'))
+  async function handleGenerate(e: React.FormEvent) {
+    e.preventDefault()
+    if (!roughText.trim()) return
+    setIsGenerating(true)
+    const result = await generateProposal(roughText)
+    setIsGenerating(false)
+    if (result.error || !result.title || !result.body) {
+      toast.error(t('generateError'))
+      return
+    }
+    setTitle(result.title)
+    setBody(result.body)
+    setTags(result.tags ?? [])
+    setStep('review')
   }
 
   function toggleSuggested(tag: string) {
@@ -55,8 +55,7 @@ export default function ProposalForm() {
 
   function addCustomTag() {
     const trimmed = customInput.trim()
-    if (!trimmed || trimmed.length > MAX_TAG_LENGTH) return
-    if (tags.includes(trimmed) || tags.length >= MAX_TAGS) return
+    if (!trimmed || trimmed.length > MAX_TAG_LENGTH || tags.includes(trimmed) || tags.length >= MAX_TAGS) return
     setTags(prev => [...prev, trimmed])
     setCustomInput('')
     customRef.current?.focus()
@@ -87,23 +86,54 @@ export default function ProposalForm() {
     doSubmit(session.sessionId)
   }
 
+  function handleStartOver() {
+    setStep('input')
+    setTitle('')
+    setBody('')
+    setTags([])
+    setCustomInput('')
+  }
+
   const atMax = tags.length >= MAX_TAGS
+
+  if (step === 'input') {
+    return (
+      <form onSubmit={handleGenerate} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="rough">{t('roughLabel')}</Label>
+          <Textarea
+            id="rough"
+            value={roughText}
+            onChange={e => setRoughText(e.target.value)}
+            placeholder={t('roughPlaceholder')}
+            rows={5}
+            maxLength={2000}
+            required
+            className="resize-none"
+            autoCorrect="off"
+          />
+          <p className={`text-xs text-right ${roughText.length > 1800 ? 'text-red-500' : 'text-gray-400'}`}>
+            {roughText.length}/2000
+          </p>
+        </div>
+        <Button
+          type="submit"
+          disabled={isGenerating || !roughText.trim()}
+          className="w-full min-h-[44px] bg-forest hover:bg-forest-dark text-white"
+        >
+          {isGenerating ? t('generating') : t('generate')}
+        </Button>
+      </form>
+    )
+  }
 
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-5">
+        <p className="text-sm text-gray-500">{t('reviewTitle')}</p>
+
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="title">{t('titleLabel')}</Label>
-            <button
-              type="button"
-              disabled={polishingTitle || !title.trim()}
-              onClick={handlePolishTitle}
-              className="text-xs text-forest hover:text-forest-dark disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {polishingTitle ? tP('polishing') : tP('button')}
-            </button>
-          </div>
+          <Label htmlFor="title">{t('titleLabel')}</Label>
           <Input
             id="title"
             value={title}
@@ -114,21 +144,13 @@ export default function ProposalForm() {
             autoCorrect="off"
             autoCapitalize="none"
           />
-          <p className={`text-xs text-right ${title.length > 90 ? 'text-red-500' : title.length > 80 ? 'text-amber-500' : 'text-gray-500'}`}>{title.length}/100</p>
+          <p className={`text-xs text-right ${title.length > 90 ? 'text-red-500' : title.length > 80 ? 'text-amber-500' : 'text-gray-400'}`}>
+            {title.length}/100
+          </p>
         </div>
 
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="body">{t('bodyLabel')}</Label>
-            <button
-              type="button"
-              disabled={polishingBody || !body.trim()}
-              onClick={handlePolishBody}
-              className="text-xs text-forest hover:text-forest-dark disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {polishingBody ? tP('polishing') : tP('button')}
-            </button>
-          </div>
+          <Label htmlFor="body">{t('bodyLabel')}</Label>
           <Textarea
             id="body"
             value={body}
@@ -140,14 +162,15 @@ export default function ProposalForm() {
             className="resize-none"
             autoCorrect="off"
           />
-          <p className={`text-xs text-right ${body.length > 950 ? 'text-red-500' : body.length > 900 ? 'text-amber-500' : 'text-gray-500'}`}>{body.length}/1000</p>
+          <p className={`text-xs text-right ${body.length > 950 ? 'text-red-500' : body.length > 900 ? 'text-amber-500' : 'text-gray-400'}`}>
+            {body.length}/1000
+          </p>
         </div>
 
         <div className="space-y-2">
           <Label>{tt('label')}</Label>
           <p className="text-xs text-gray-500">{tt('hint', { max: MAX_TAGS, maxLen: MAX_TAG_LENGTH })}</p>
 
-          {/* Selected tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {tags.map(tag => (
@@ -165,7 +188,6 @@ export default function ProposalForm() {
             </div>
           )}
 
-          {/* Predefined chips */}
           <div className="flex flex-wrap gap-1.5">
             {SUGGESTED_TAGS.map(tag => {
               const selected = tags.includes(tag)
@@ -191,7 +213,6 @@ export default function ProposalForm() {
             })}
           </div>
 
-          {/* Custom tag input */}
           <div className="flex gap-2">
             <Input
               ref={customRef}
@@ -217,14 +238,26 @@ export default function ProposalForm() {
           </div>
         </div>
 
-        <Button
-          type="submit"
-          disabled={isPending || polishingTitle || polishingBody || !title.trim() || !body.trim() || tags.length === 0}
-          className="w-full min-h-[44px] bg-forest hover:bg-forest-dark text-white"
-        >
-          {isPending ? t('submitting') : t('submit')}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleStartOver}
+            disabled={isPending}
+            className="min-h-[44px]"
+          >
+            {t('startOver')}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isPending || !title.trim() || !body.trim() || tags.length === 0}
+            className="flex-1 min-h-[44px] bg-forest hover:bg-forest-dark text-white"
+          >
+            {isPending ? t('submitting') : t('submit')}
+          </Button>
+        </div>
       </form>
+
       <DeclarationModal
         open={showModal}
         onDeclared={handleDeclared}
