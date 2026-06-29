@@ -1,19 +1,25 @@
 'use server'
 
+import { timingSafeEqual } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
-
-const VALID_CATEGORIES = ['財政','人口','産業','林業','農業','観光','教育','医療福祉','インフラ','脱炭素','その他']
+import { VALID_CATEGORIES } from '@/lib/categories'
 
 function isValidUUID(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
 }
 
+function safeTokenEqual(a: string | undefined, b: string | undefined): boolean {
+  if (!a || !b || a.length !== b.length) return false
+  try { return timingSafeEqual(Buffer.from(a), Buffer.from(b)) } catch { return false }
+}
+
 async function isAdmin(): Promise<boolean> {
+  if (!process.env.ADMIN_TOKEN) return false
   const cookieStore = await cookies()
-  return cookieStore.get('nv_admin')?.value === process.env.ADMIN_TOKEN
+  return safeTokenEqual(cookieStore.get('nv_admin')?.value, process.env.ADMIN_TOKEN)
 }
 
 export async function toggleVote(questionId: string, sessionId: string, isResident: boolean) {
@@ -21,12 +27,14 @@ export async function toggleVote(questionId: string, sessionId: string, isReside
 
   const db = createAdminClient()
 
-  const { data: existing } = await db
+  const { data: existing, error: fetchError } = await db
     .from('votes')
     .select('id')
     .eq('question_id', questionId)
     .eq('session_id', sessionId)
     .single()
+
+  if (fetchError && fetchError.code !== 'PGRST116') return { error: fetchError.message }
 
   if (existing) {
     const { error } = await db.from('votes').delete().eq('id', existing.id)
@@ -44,6 +52,7 @@ export async function toggleVote(questionId: string, sessionId: string, isReside
 export async function addComment(questionId: string, sessionId: string, body: string, displayName: string, isResident: boolean) {
   if (!isValidUUID(sessionId) || !isValidUUID(questionId)) return { error: 'invalid' }
   if (!body.trim()) return { error: 'empty' }
+  if (body.trim().length > 500) return { error: 'too_long' }
 
   const db = createAdminClient()
 
@@ -73,7 +82,7 @@ export async function proposeQuestion(title: string, body: string, category: str
   if (!isValidUUID(sessionId)) return { error: 'invalid' }
   if (!title.trim() || title.length > 100) return { error: 'invalid' }
   if (!body.trim() || body.length > 1000) return { error: 'invalid' }
-  if (!VALID_CATEGORIES.includes(category)) return { error: 'invalid' }
+  if (!VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number])) return { error: 'invalid' }
 
   const db = createAdminClient()
   const { data: question, error } = await db
@@ -93,6 +102,7 @@ export async function proposeQuestion(title: string, body: string, category: str
 }
 
 export async function updateQuestionStatus(questionId: string, status: 'active' | 'proposed' | 'archived' | 'selected') {
+  if (!isValidUUID(questionId)) return { error: 'invalid' }
   if (!await isAdmin()) return { error: 'unauthorized' }
 
   const db = createAdminClient()

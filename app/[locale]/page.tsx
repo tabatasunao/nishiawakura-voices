@@ -12,12 +12,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const [{ data: activeQuestions }, { data: proposedQuestions }] = await Promise.all([
     supabase
       .from('questions')
-      .select('*')
+      .select('id, number, title, title_en_cache, category, status, vote_count, resident_vote_count')
       .in('status', ['active', 'selected'])
       .order('vote_count', { ascending: false }),
     supabase
       .from('questions')
-      .select('*')
+      .select('id, number, title, title_en_cache, category, status, vote_count, resident_vote_count')
       .eq('status', 'proposed')
       .order('vote_count', { ascending: false }),
   ])
@@ -45,7 +45,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <TabsContent value="active">
           <ul className="space-y-3">
             {(activeQuestions ?? []).map((q, i) => (
-              <li key={q.id}><QuestionCard question={q} rank={i + 1} locale={locale} /></li>
+              <li key={q.id}><QuestionCard question={q as Parameters<typeof QuestionCard>[0]['question']} rank={i + 1} locale={locale} /></li>
             ))}
           </ul>
         </TabsContent>
@@ -53,10 +53,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <TabsContent value="proposed">
           <ul className="space-y-3">
             {(proposedQuestions ?? []).map((q, i) => (
-              <li key={q.id}><QuestionCard question={q} rank={i + 1} locale={locale} /></li>
+              <li key={q.id}><QuestionCard question={q as Parameters<typeof QuestionCard>[0]['question']} rank={i + 1} locale={locale} /></li>
             ))}
             {(proposedQuestions?.length ?? 0) === 0 && (
-              <p className="text-gray-400 text-sm text-center py-8">提案された質問はまだありません</p>
+              <p className="text-gray-400 text-sm text-center py-8">{t('noProposals')}</p>
             )}
           </ul>
         </TabsContent>

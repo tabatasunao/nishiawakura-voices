@@ -15,23 +15,30 @@
     "residentCount": "うち村民{count}人",
     "commentCount": "{count}件のコメント",
     "topBadge": "TOP10",
-    "selectedBadge": "選定済"
+    "selectedBadge": "選定済",
+    "noProposals": "提案された質問はまだありません"
   },
   "question": {
     "comments": "コメント",
     "commentPlaceholder": "この質問についてご意見をどうぞ…",
     "submitComment": "投稿する",
     "residentLabel": "村民",
-    "backToList": "一覧に戻る"
+    "backToList": "一覧に戻る",
+    "voteCount": "{count}票",
+    "residentVoteDetail": "うち村民{count}人",
+    "anonymous": "匿名",
+    "delete": "削除"
   },
   "propose": {
     "title": "新しい質問を提案する",
+    "subtitle": "提案した質問はすぐに公開され、他の方が投票できます。",
     "titleLabel": "質問タイトル",
     "titlePlaceholder": "短いタイトルを入力してください",
     "bodyLabel": "質問の内容",
     "bodyPlaceholder": "候補者に聞きたいことを具体的に書いてください…",
     "categoryLabel": "カテゴリ",
     "submit": "提案する",
+    "submitting": "送信中…",
     "success": "質問が提案されました。ありがとうございます！"
   },
   "categories": {
@@ -55,6 +62,7 @@
     "nameLabel": "表示名（任意）",
     "namePlaceholder": "ニックネームや名前",
     "submit": "はじめる",
+    "cancel": "キャンセル",
     "subtitle": "投票やコメントに使う情報です。村民の方は「村民」バッジが付きます。"
   },
   "admin": {
@@ -63,15 +71,24 @@
     "selectTop10": "公開質問状に選定",
     "deselectTop10": "選定を解除",
     "archive": "非表示にする",
+    "restore": "復元",
     "exportTitle": "公開質問状をエクスポート",
     "export": "マークダウンでエクスポート",
+    "selectedCount": "選定済み: {count}/{total}",
     "voteCount": "票数",
     "residentVotes": "村民票",
     "status": "ステータス",
-    "category": "カテゴリ"
+    "category": "カテゴリ",
+    "statusLabels": {
+      "active": "公開中",
+      "proposed": "提案",
+      "selected": "選定済",
+      "archived": "非表示"
+    }
   },
   "errors": {
     "generic": "エラーが発生しました。もう一度お試しください。",
-    "commentEmpty": "コメントを入力してください。"
+    "commentEmpty": "コメントを入力してください。",
+    "commentTooLong": "コメントは500文字以内でお書きください。"
   }
 }

@@ -9,7 +9,7 @@ export default async function ProposePage({ params }: { params: Promise<{ locale
   return (
     <div className="max-w-xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
-      <p className="text-gray-500 text-sm mb-8">提案した質問はすぐに公開され、他の方が投票できます。</p>
+      <p className="text-gray-500 text-sm mb-8">{t('subtitle')}</p>
       <ProposalForm />
     </div>
   )

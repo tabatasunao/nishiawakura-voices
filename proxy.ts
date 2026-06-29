@@ -10,7 +10,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Admin route protection
-  if (pathname.includes('/admin')) {
+  if (/\/admin(\/|$)/.test(pathname)) {
     const token = request.nextUrl.searchParams.get('token')
     const adminCookie = request.cookies.get(ADMIN_COOKIE)?.value
 

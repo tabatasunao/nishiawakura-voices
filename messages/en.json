@@ -15,23 +15,30 @@
     "residentCount": "incl. {count} residents",
     "commentCount": "{count} comments",
     "topBadge": "TOP10",
-    "selectedBadge": "Selected"
+    "selectedBadge": "Selected",
+    "noProposals": "No proposed questions yet"
   },
   "question": {
     "comments": "Comments",
     "commentPlaceholder": "Share your thoughts on this question…",
     "submitComment": "Submit",
     "residentLabel": "Resident",
-    "backToList": "Back to list"
+    "backToList": "Back to list",
+    "voteCount": "{count} votes",
+    "residentVoteDetail": "incl. {count} residents",
+    "anonymous": "Anonymous",
+    "delete": "Delete"
   },
   "propose": {
     "title": "Propose a New Question",
+    "subtitle": "Your proposed question will be published immediately and open to votes from the community.",
     "titleLabel": "Question Title",
     "titlePlaceholder": "Enter a short title",
     "bodyLabel": "Question Body",
     "bodyPlaceholder": "Write what you'd like to ask candidates, as specifically as possible…",
     "categoryLabel": "Category",
     "submit": "Submit Proposal",
+    "submitting": "Submitting…",
     "success": "Your question has been submitted. Thank you!"
   },
   "categories": {
@@ -55,6 +62,7 @@
     "nameLabel": "Display Name (optional)",
     "namePlaceholder": "Nickname or name",
     "submit": "Get Started",
+    "cancel": "Cancel",
     "subtitle": "This information will appear alongside your votes and comments. Residents will receive a 'Resident' badge."
   },
   "admin": {
@@ -63,15 +71,24 @@
     "selectTop10": "Select for Inquiry Letter",
     "deselectTop10": "Deselect",
     "archive": "Archive",
+    "restore": "Restore",
     "exportTitle": "Export Candidate Inquiry Letter",
     "export": "Export as Markdown",
+    "selectedCount": "Selected: {count}/{total}",
     "voteCount": "Votes",
     "residentVotes": "Resident Votes",
     "status": "Status",
-    "category": "Category"
+    "category": "Category",
+    "statusLabels": {
+      "active": "Active",
+      "proposed": "Proposed",
+      "selected": "Selected",
+      "archived": "Archived"
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
-    "commentEmpty": "Please enter a comment."
+    "commentEmpty": "Please enter a comment.",
+    "commentTooLong": "Comment must be 500 characters or fewer."
   }
 }

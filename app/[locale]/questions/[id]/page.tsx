@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto'
 import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
@@ -7,6 +8,11 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
 import VoteButton from '@/components/VoteButton'
 import CommentSection from '@/components/CommentSection'
+
+function safeTokenEqual(a: string | undefined, b: string | undefined): boolean {
+  if (!a || !b || a.length !== b.length) return false
+  try { return timingSafeEqual(Buffer.from(a), Buffer.from(b)) } catch { return false }
+}
 
 export default async function QuestionPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   const { id, locale } = await params
@@ -18,23 +24,18 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const { data: question } = await supabase.from('questions').select('*').eq('id', id).single()
   if (!question) notFound()
 
-  // Auto-translate on first EN visit and cache the result
+  // Fire-and-forget translation on first EN visit — page renders immediately with Japanese fallback
   if (locale === 'en' && process.env.OPENAI_API_KEY) {
     const needsTitle = !question.title_en_cache
     const needsBody = !question.body_en_cache
     if (needsTitle || needsBody) {
-      try {
-        const adminClient = createAdminClient()
-        const [titleEn, bodyEn] = await Promise.all([
-          needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
-          needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
-        ])
-        await adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
-        question.title_en_cache = titleEn
-        question.body_en_cache = bodyEn
-      } catch {
-        // Falls back to Japanese on translation error
-      }
+      const adminClient = createAdminClient()
+      Promise.all([
+        needsTitle ? translateToEnglish(question.title) : Promise.resolve(question.title_en_cache!),
+        needsBody ? translateToEnglish(question.body) : Promise.resolve(question.body_en_cache!),
+      ]).then(([titleEn, bodyEn]) =>
+        adminClient.from('questions').update({ title_en_cache: titleEn, body_en_cache: bodyEn }).eq('id', id)
+      ).catch(() => {})
     }
   }
 
@@ -42,7 +43,8 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const body = locale === 'en' && question.body_en_cache ? question.body_en_cache : question.body
 
   const cookieStore = await cookies()
-  const isAdmin = cookieStore.get('nv_admin')?.value === process.env.ADMIN_TOKEN
+  const isAdmin = !!process.env.ADMIN_TOKEN &&
+    safeTokenEqual(cookieStore.get('nv_admin')?.value, process.env.ADMIN_TOKEN)
 
   const { data: commentsRaw } = await supabase
     .from('comments')
@@ -52,7 +54,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
 
   return (
     <div>
-      <Link href="/" className="text-sm text-[#2D6A4F] hover:underline mb-6 inline-block">
+      <Link href="/" className="text-sm text-forest hover:underline mb-6 inline-block py-1">
         ← {t('backToList')}
       </Link>
 
@@ -71,15 +73,14 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
 
         <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            <span className="mr-3">{question.vote_count}票</span>
+            <span className="mr-3">{t('voteCount', { count: question.vote_count })}</span>
             {question.resident_vote_count > 0 && (
-              <span className="text-green-700">うち村民{question.resident_vote_count}人</span>
+              <span className="text-green-700">{t('residentVoteDetail', { count: question.resident_vote_count })}</span>
             )}
           </div>
           <VoteButton
             questionId={question.id}
             initialVoteCount={question.vote_count}
-            initialVoted={false}
           />
         </div>
       </div>

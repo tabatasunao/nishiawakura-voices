@@ -12,9 +12,10 @@ import { getSession, saveSession, getOrCreateSessionId, type Session } from '@/l
 interface Props {
   open: boolean
   onDeclared: (session: Session) => void
+  onCancel?: () => void
 }
 
-export default function DeclarationModal({ open, onDeclared }: Props) {
+export default function DeclarationModal({ open, onDeclared, onCancel }: Props) {
   const t = useTranslations('onboarding')
   const [isResident, setIsResident] = useState<'yes' | 'no' | null>(null)
   const [displayName, setDisplayName] = useState('')
@@ -32,8 +33,14 @@ export default function DeclarationModal({ open, onDeclared }: Props) {
     onDeclared(session)
   }
 
+  function handleCancel() {
+    setIsResident(null)
+    setDisplayName('')
+    onCancel?.()
+  }
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={open => { if (!open) handleCancel() }}>
       <DialogContent className="sm:max-w-sm" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
@@ -44,11 +51,11 @@ export default function DeclarationModal({ open, onDeclared }: Props) {
           <div className="space-y-3">
             <Label className="text-sm font-medium">{t('residentQuestion')}</Label>
             <RadioGroup value={isResident ?? ''} onValueChange={v => setIsResident(v as 'yes' | 'no')}>
-              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-[#2D6A4F] cursor-pointer transition-colors">
+              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-forest cursor-pointer transition-colors">
                 <RadioGroupItem value="yes" id="yes" />
                 <Label htmlFor="yes" className="cursor-pointer flex-1 font-normal">{t('yes')}</Label>
               </div>
-              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-[#2D6A4F] cursor-pointer transition-colors">
+              <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-forest cursor-pointer transition-colors">
                 <RadioGroupItem value="no" id="no" />
                 <Label htmlFor="no" className="cursor-pointer flex-1 font-normal">{t('no')}</Label>
               </div>
@@ -63,16 +70,24 @@ export default function DeclarationModal({ open, onDeclared }: Props) {
               onChange={e => setDisplayName(e.target.value)}
               placeholder={t('namePlaceholder')}
               maxLength={30}
+              autoComplete="nickname"
+              autoCorrect="off"
             />
           </div>
 
           <Button
             type="submit"
             disabled={isResident === null}
-            className="w-full bg-[#2D6A4F] hover:bg-[#245a42] text-white"
+            className="w-full min-h-[44px] bg-forest hover:bg-forest-dark text-white"
+            title={isResident === null ? t('residentQuestion') : undefined}
           >
             {t('submit')}
           </Button>
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={handleCancel} className="w-full min-h-[44px]">
+              {t('cancel')}
+            </Button>
+          )}
         </form>
       </DialogContent>
     </Dialog>

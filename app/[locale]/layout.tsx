@@ -35,7 +35,13 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={`${notoSansJP.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-gray-50 font-[family-name:var(--font-noto-sans-jp)]">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
+      <body
+        className="min-h-full flex flex-col bg-gray-50 font-[family-name:var(--font-noto-sans-jp)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <NextIntlClientProvider messages={messages}>
           <NavBar />
           <main className="flex-1 container mx-auto max-w-3xl px-4 py-8">

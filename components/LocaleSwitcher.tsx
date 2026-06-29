@@ -15,8 +15,16 @@ export default function LocaleSwitcher() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onClick={switchLocale} className="text-sm font-medium">
-      {locale === 'ja' ? 'EN' : '日本語'}
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={switchLocale}
+      className="text-sm font-medium min-h-[44px] gap-1"
+      aria-label={locale === 'ja' ? 'Switch to English' : '日本語に切り替え'}
+    >
+      <span className="font-bold text-forest">{locale.toUpperCase()}</span>
+      <span className="text-gray-300">|</span>
+      <span className="text-gray-400">{locale === 'ja' ? 'EN' : 'JA'}</span>
     </Button>
   )
 }

@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-forest: #2D6A4F;
+  --color-forest-dark: #245a42;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -127,4 +129,9 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Sonner toast safe-area offset on notched devices */
+[data-sonner-toaster] {
+  padding-bottom: env(safe-area-inset-bottom) !important;
 }
