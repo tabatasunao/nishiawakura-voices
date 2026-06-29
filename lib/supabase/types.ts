@@ -11,7 +11,7 @@ export type Database = {
           body: string
           title_en_cache: string | null
           body_en_cache: string | null
-          category: string
+          tags: string[]
           status: 'active' | 'proposed' | 'archived' | 'selected'
           vote_count: number
           resident_vote_count: number
@@ -25,7 +25,7 @@ export type Database = {
           body: string
           title_en_cache?: string | null
           body_en_cache?: string | null
-          category: string
+          tags?: string[]
           status?: 'active' | 'proposed' | 'archived' | 'selected'
           vote_count?: number
           resident_vote_count?: number
@@ -37,7 +37,7 @@ export type Database = {
           body?: string
           title_en_cache?: string | null
           body_en_cache?: string | null
-          category?: string
+          tags?: string[]
           status?: 'active' | 'proposed' | 'archived' | 'selected'
           vote_count?: number
           resident_vote_count?: number

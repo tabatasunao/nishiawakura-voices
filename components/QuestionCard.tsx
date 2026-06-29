@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Question } from '@/lib/supabase/types'
+import { isSuggestedTag } from '@/lib/tags'
 import VoteButton from './VoteButton'
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 export default async function QuestionCard({ question, rank, locale }: Props) {
   const t = await getTranslations('home')
-  const ct = await getTranslations('categories')
+  const tt = await getTranslations('tags')
 
   const title = locale === 'en' && question.title_en_cache ? question.title_en_cache : question.title
   const isTop10 = rank <= 10
@@ -30,9 +31,11 @@ export default async function QuestionCard({ question, rank, locale }: Props) {
           </span>
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap gap-1.5 mb-1.5">
-              <Badge variant="outline" className="text-xs">
-                {ct(question.category as Parameters<typeof ct>[0])}
-              </Badge>
+              {question.tags.map(tag => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {isSuggestedTag(tag) ? tt(tag as Parameters<typeof tt>[0]) : tag}
+                </Badge>
+              ))}
               {isSelected && (
                 <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">{t('selectedBadge')}</Badge>
               )}

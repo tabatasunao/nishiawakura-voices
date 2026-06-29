@@ -41,12 +41,12 @@
     "titlePlaceholder": "Enter a short title",
     "bodyLabel": "Question Body",
     "bodyPlaceholder": "Write what you'd like to ask candidates, as specifically as possible…",
-    "categoryLabel": "Category",
+    "tagsLabel": "Tags",
     "submit": "Submit Proposal",
     "submitting": "Submitting…",
     "success": "Your question has been submitted. Thank you!"
   },
-  "categories": {
+  "tags": {
     "財政": "Finance",
     "人口": "Population",
     "産業": "Industry",
@@ -57,7 +57,13 @@
     "医療福祉": "Healthcare & Welfare",
     "インフラ": "Infrastructure",
     "脱炭素": "Decarbonization",
-    "その他": "Other"
+    "その他": "Other",
+    "label": "Select tags",
+    "placeholder": "Add a custom tag…",
+    "addButton": "Add",
+    "removeTag": "Remove {tag}",
+    "hint": "Up to {max} tags, {maxLen} characters each",
+    "noTags": "No tags"
   },
   "onboarding": {
     "title": "Tell us about yourself",
@@ -85,7 +91,7 @@
     "voteCount": "Votes",
     "residentVotes": "Resident Votes",
     "status": "Status",
-    "category": "Category",
+    "tags": "Tags",
     "statusLabels": {
       "active": "Active",
       "proposed": "Proposed",

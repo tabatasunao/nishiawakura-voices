@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { toast } from 'sonner'
@@ -9,24 +9,45 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { proposeQuestion } from '@/app/actions'
-import { VALID_CATEGORIES } from '@/lib/categories'
+import { SUGGESTED_TAGS, MAX_TAGS, MAX_TAG_LENGTH, isSuggestedTag } from '@/lib/tags'
 import { getSession, type Session } from '@/lib/session'
 import DeclarationModal from './DeclarationModal'
 
 export default function ProposalForm() {
   const t = useTranslations('propose')
-  const ct = useTranslations('categories')
+  const tt = useTranslations('tags')
   const tErr = useTranslations('errors')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [category, setCategory] = useState('その他')
+  const [tags, setTags] = useState<string[]>([])
+  const [customInput, setCustomInput] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const customRef = useRef<HTMLInputElement>(null)
+
+  function toggleSuggested(tag: string) {
+    setTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : prev.length < MAX_TAGS ? [...prev, tag] : prev
+    )
+  }
+
+  function addCustomTag() {
+    const trimmed = customInput.trim()
+    if (!trimmed || trimmed.length > MAX_TAG_LENGTH) return
+    if (tags.includes(trimmed) || tags.length >= MAX_TAGS) return
+    setTags(prev => [...prev, trimmed])
+    setCustomInput('')
+    customRef.current?.focus()
+  }
+
+  function removeTag(tag: string) {
+    setTags(prev => prev.filter(t => t !== tag))
+  }
 
   function doSubmit(sessionId: string) {
     startTransition(async () => {
-      const result = await proposeQuestion(title.trim(), body.trim(), category, sessionId)
+      const result = await proposeQuestion(title.trim(), body.trim(), tags, sessionId)
       if (result.error) toast.error(tErr('generic'))
       else { toast.success(t('success')); router.push('/') }
     })
@@ -34,7 +55,7 @@ export default function ProposalForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!title.trim() || !body.trim()) return
+    if (!title.trim() || !body.trim() || tags.length === 0) return
     const session = getSession()
     if (!session?.declared) { setShowModal(true); return }
     doSubmit(session.sessionId)
@@ -44,6 +65,8 @@ export default function ProposalForm() {
     setShowModal(false)
     doSubmit(session.sessionId)
   }
+
+  const atMax = tags.length >= MAX_TAGS
 
   return (
     <>
@@ -79,21 +102,83 @@ export default function ProposalForm() {
           <p className={`text-xs text-right ${body.length > 950 ? 'text-red-500' : body.length > 900 ? 'text-amber-500' : 'text-gray-500'}`}>{body.length}/1000</p>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="category">{t('categoryLabel')}</Label>
-          <select
-            id="category"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
-          >
-            {VALID_CATEGORIES.map(c => <option key={c} value={c}>{ct(c as Parameters<typeof ct>[0])}</option>)}
-          </select>
+        <div className="space-y-2">
+          <Label>{tt('label')}</Label>
+          <p className="text-xs text-gray-500">{tt('hint', { max: MAX_TAGS, maxLen: MAX_TAG_LENGTH })}</p>
+
+          {/* Selected tags */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  aria-label={tt('removeTag', { tag })}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-forest text-white min-h-[28px]"
+                >
+                  {isSuggestedTag(tag) ? tt(tag as Parameters<typeof tt>[0]) : tag}
+                  <span aria-hidden>×</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Predefined chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTED_TAGS.map(tag => {
+              const selected = tags.includes(tag)
+              const disabled = !selected && atMax
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleSuggested(tag)}
+                  disabled={disabled}
+                  aria-pressed={selected}
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium border min-h-[28px] transition-colors ${
+                    selected
+                      ? 'bg-forest/10 border-forest text-forest'
+                      : disabled
+                      ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                      : 'border-gray-300 text-gray-600 hover:border-forest hover:text-forest'
+                  }`}
+                >
+                  {tt(tag as Parameters<typeof tt>[0])}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Custom tag input */}
+          <div className="flex gap-2">
+            <Input
+              ref={customRef}
+              value={customInput}
+              onChange={e => setCustomInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomTag() } }}
+              placeholder={tt('placeholder')}
+              maxLength={MAX_TAG_LENGTH}
+              disabled={atMax}
+              autoCorrect="off"
+              autoCapitalize="none"
+              className="text-sm"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addCustomTag}
+              disabled={atMax || !customInput.trim()}
+              className="shrink-0"
+            >
+              {tt('addButton')}
+            </Button>
+          </div>
         </div>
 
         <Button
           type="submit"
-          disabled={isPending || !title.trim() || !body.trim()}
+          disabled={isPending || !title.trim() || !body.trim() || tags.length === 0}
           className="w-full min-h-[44px] bg-forest hover:bg-forest-dark text-white"
         >
           {isPending ? t('submitting') : t('submit')}

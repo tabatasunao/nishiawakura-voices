@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation'
 import { Badge } from '@/components/ui/badge'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { translateToEnglish } from '@/lib/translate'
+import { isSuggestedTag } from '@/lib/tags'
 import VoteButton from '@/components/VoteButton'
 import CommentSection from '@/components/CommentSection'
 
@@ -19,7 +20,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
   const { id, locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('question')
-  const ct = await getTranslations('categories')
+  const tt = await getTranslations('tags')
   const supabase = await createClient()
 
   const [{ data: question }, { data: commentsRaw }] = await Promise.all([
@@ -61,9 +62,11 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <div className="flex flex-wrap gap-2 mb-3">
-          <Badge variant="outline" className="text-xs">
-            {ct(question.category as Parameters<typeof ct>[0])}
-          </Badge>
+          {question.tags.map(tag => (
+            <Badge key={tag} variant="outline" className="text-xs">
+              {isSuggestedTag(tag) ? tt(tag as Parameters<typeof tt>[0]) : tag}
+            </Badge>
+          ))}
           {question.number && (
             <Badge variant="secondary" className="text-xs">Q{question.number}</Badge>
           )}

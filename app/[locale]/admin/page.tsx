@@ -22,7 +22,7 @@ export default async function AdminPage({ params }: { params: Promise<{ locale: 
   const supabase = await createClient()
   const { data: questions } = await supabase
     .from('questions')
-    .select('id, number, title, body, vote_count, resident_vote_count, category, status, proposed_by_session, created_at, title_en_cache, body_en_cache')
+    .select('id, number, title, body, vote_count, resident_vote_count, tags, status, proposed_by_session, created_at, title_en_cache, body_en_cache')
     .order('vote_count', { ascending: false })
 
   return (

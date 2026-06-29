@@ -41,12 +41,12 @@
     "titlePlaceholder": "短いタイトルを入力してください",
     "bodyLabel": "質問の内容",
     "bodyPlaceholder": "候補者に聞きたいことを具体的に書いてください…",
-    "categoryLabel": "カテゴリ",
+    "tagsLabel": "タグ",
     "submit": "提案する",
     "submitting": "送信中…",
     "success": "質問が提案されました。ありがとうございます！"
   },
-  "categories": {
+  "tags": {
     "財政": "財政",
     "人口": "人口",
     "産業": "産業",
@@ -57,7 +57,13 @@
     "医療福祉": "医療福祉",
     "インフラ": "インフラ",
     "脱炭素": "脱炭素",
-    "その他": "その他"
+    "その他": "その他",
+    "label": "タグを選択",
+    "placeholder": "独自のタグを追加…",
+    "addButton": "追加",
+    "removeTag": "{tag}を外す",
+    "hint": "最大{max}個・{maxLen}文字以内",
+    "noTags": "タグなし"
   },
   "onboarding": {
     "title": "はじめに教えてください",
@@ -85,7 +91,7 @@
     "voteCount": "票数",
     "residentVotes": "村民票",
     "status": "ステータス",
-    "category": "カテゴリ",
+    "tags": "タグ",
     "statusLabels": {
       "active": "公開中",
       "proposed": "提案",
